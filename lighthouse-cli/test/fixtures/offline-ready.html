@@ -1,0 +1,30 @@
+<!doctype html>
+
+<title>So offline-ready. The most.</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+<!--<link rel="manifest" href="/manifest.json">-->
+
+<h1>
+  Whenever you call me, I'll be there.
+</h1>
+<h2>
+  Whenever you want me, I'll be there.
+</h2>
+<h3>
+  Whenever you need me, I'll be there.
+</h3>
+<h4>
+  I'll be arounddddd.
+</h4>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/offline-ready-sw.js').then(function() {
+      console.log('service worker is is all cool.');
+    }).catch(function(e) {
+      console.error('service worker is not so cool.', e);
+      throw e;
+    });
+  }
+</script>

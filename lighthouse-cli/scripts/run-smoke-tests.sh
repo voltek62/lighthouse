@@ -32,7 +32,7 @@ fi
 sleep 1s
 
 # test mojibrush which should pass the offline test
-$NODE lighthouse-cli $flags https://www.moji-brush.com > results
+$NODE lighthouse-cli $flags http://localhost:9999/offline-ready-sw.js > results
 
 if ! grep -q "$offline200result: true" results; then
   echo "Fail! offline ready site did not work while offline"
