@@ -31,7 +31,7 @@ fi
 
 sleep 1s
 
-# test mojibrush which should pass the offline test
+# test basic sw page which should pass the offline test
 $NODE lighthouse-cli $flags http://localhost:9999/offline-ready-sw.js > results
 
 if ! grep -q "$offline200result: true" results; then
