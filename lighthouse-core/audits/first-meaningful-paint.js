@@ -19,6 +19,7 @@
 
 const Audit = require('./audit');
 const TracingProcessor = require('../lib/traces/tracing-processor');
+const Formatter = require('../formatters/formatter');
 
 const FAILURE_MESSAGE = 'Navigation and first paint timings not found.';
 
@@ -52,11 +53,12 @@ class FirstMeaningfulPaint extends Audit {
    */
   static audit(artifacts) {
     return new Promise((resolve, reject) => {
-      if (!artifacts.traceContents || !Array.isArray(artifacts.traceContents)) {
+      const traceContents = artifacts.traces[this.DEFAULT_TRACE].traceContents;
+      if (!traceContents || !Array.isArray(traceContents)) {
         throw new Error(FAILURE_MESSAGE);
       }
 
-      const evts = this.collectEvents(artifacts.traceContents);
+      const evts = this.collectEvents(traceContents);
 
       const navStart = evts.navigationStart;
       const fCP = evts.firstContentfulPaint;
@@ -84,7 +86,10 @@ class FirstMeaningfulPaint extends Audit {
         displayValue: `${result.duration}ms`,
         debugString: result.debugString,
         optimalValue: this.meta.optimalValue,
-        extendedInfo: result.extendedInfo
+        extendedInfo: {
+          value: result.extendedInfo,
+          formatter: Formatter.SUPPORTED_FORMATS.NULL
+        }
       }));
     }).catch(err => {
       // Recover from trace parsing failures.
@@ -127,6 +132,7 @@ class FirstMeaningfulPaint extends Audit {
     score = Math.min(100, score);
     score = Math.max(0, score);
 
+    timings.navStart = data.navStart.ts / 1000;
     return {
       duration: `${firstMeaningfulPaint.toFixed(1)}`,
       score: Math.round(score),
@@ -168,6 +174,7 @@ class FirstMeaningfulPaint extends Audit {
       }
       // firstContentfulPaint == the first time that text or image content was
       // painted. See src/third_party/WebKit/Source/core/paint/PaintTiming.h
+      // COMPAT: firstContentfulPaint trace event first introduced in Chrome 49 (r370921)
       if (event.name === 'firstContentfulPaint' && event.args.frame === mainFrameID) {
         firstContentfulPaint = event;
       }
