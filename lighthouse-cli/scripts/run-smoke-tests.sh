@@ -32,7 +32,7 @@ fi
 sleep 1s
 
 # test basic sw page which should pass the offline test
-$NODE lighthouse-cli $flags http://localhost:9999/offline-ready-sw.js > results
+$NODE lighthouse-cli $flags http://localhost:9999/offline-ready-sw.html > results
 
 if ! grep -q "$offline200result: true" results; then
   echo "Fail! offline ready site did not work while offline"
