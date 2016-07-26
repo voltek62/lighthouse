@@ -15,7 +15,7 @@
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
     "start": "node ./lighthouse-cli/index.js",
     "test": "npm run lint --silent && npm run unit && npm run closure",
-    "cli-unit": "mocha $(echo $__node_harmony) $(find lighthouse-cli/test lighthouse-core/test -name '*.js') --timeout 60000",
+    "cli-unit": "mocha $(echo $__node_harmony) $(find lighthouse-cli/test lighthouse-core/test -name '*.js' -not -path '*/fixtures/*') --timeout 60000",
     "unit": "npm run cli-unit",
     "//":
     "// passing through tasks to core",
