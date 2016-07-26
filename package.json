@@ -11,7 +11,7 @@
     "//": "// passing through tasks to core",
     "lint": "eslint .",
     "smoke": "lighthouse-cli/scripts/run-smoke-tests.sh",
-    "coverage": "node $(echo $__node_harmony) $(npm bin)/istanbul cover -x \"**/third_party/**\" _mocha -- $(find */test -name '*.js') --timeout 60000",
+    "coverage": "node $(echo $__node_harmony) $(npm bin)/istanbul cover -x \"**/third_party/**\" _mocha -- $(find */test -name '*.js' -not -path '*/fixtures/*') --timeout 60000",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
     "start": "node ./lighthouse-cli/index.js",
     "test": "npm run lint --silent && npm run unit && npm run closure",
