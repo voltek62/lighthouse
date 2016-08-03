@@ -17,7 +17,7 @@
 
 /* eslint-env mocha */
 
-const ScreenshotsGather = require('../../../gather/gatherers/screenshots');
+const ScreenshotsGather = require('../../../gather/computed/screenshots');
 const assert = require('assert');
 let screenshotsGather = new ScreenshotsGather();
 
@@ -27,11 +27,11 @@ describe('Screenshot gatherer', () => {
     // Currently this test must rely on knowing the phase hook for the gatherer.
     // A little unfortunate, but we need a "run scheduler with this gatherer, this mocked driver,
     // and this trace" test class to do that right
-    return screenshotsGather.afterPass(undefined, {traceContents: traceData}).then(_ => {
-      assert.ok(Array.isArray(screenshotsGather.artifact));
-      assert.equal(screenshotsGather.artifact.length, 7);
+    return screenshotsGather.request(traceData).then(screenshots => {
+      assert.ok(Array.isArray(screenshots));
+      assert.equal(screenshots.length, 7);
 
-      const firstScreenshot = screenshotsGather.artifact[0];
+      const firstScreenshot = screenshots[0];
       assert.ok(firstScreenshot.datauri.startsWith('data:image/jpg;base64,'));
       assert.ok(firstScreenshot.datauri.length > 42);
     });

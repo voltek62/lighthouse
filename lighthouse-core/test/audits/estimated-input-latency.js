@@ -16,33 +16,38 @@
 'use strict';
 
 const Audit = require('../../audits/estimated-input-latency.js');
+const GatherRunner = require('../../gather/gather-runner.js');
 const assert = require('assert');
-const traceContents = require('../fixtures/traces/progressive-app.json');
 
+const pwaTrace = require('../fixtures/traces/progressive-app.json');
+
+
+let computedArtifacts = GatherRunner.instantiateComputedArtifacts();
+
+function generateArtifactsWithTrace(trace) {
+  return Object.assign(computedArtifacts, {
+    traces: {
+      [Audit.DEFAULT_TRACE]: trace
+    }
+  });
+}
 /* eslint-env mocha */
 
 describe('Performance: estimated-input-latency audit', () => {
   it('scores a -1 with invalid trace data', () => {
-    const output = Audit.audit({
-      traces: {[Audit.DEFAULT_TRACE]: {traceContents: '[{"pid": 15256,"tid": 1295,"t'}},
-      Speedline: {
-        first: 500
-      }
+    const artifacts = generateArtifactsWithTrace({traceContents: '[{"pid": 15256,"tid": 1295,"t'});
+    return Audit.audit(artifacts).then(output => {
+      assert.equal(output.score, -1);
+      assert(output.debugString);
     });
-    assert.equal(output.score, -1);
-    assert(output.debugString);
   });
 
   it('evaluates valid input correctly', () => {
-    const output = Audit.audit({
-      traces: {[Audit.DEFAULT_TRACE]: {traceContents}},
-      Speedline: {
-        first: 500
-      }
+    const artifacts = generateArtifactsWithTrace({traceContents: pwaTrace});
+    return Audit.audit(artifacts).then(output => {
+      assert.equal(output.rawValue, 17.4);
+      assert.equal(output.displayValue, '17.4ms');
+      assert.equal(output.score, 100);
     });
-
-    assert.equal(output.rawValue, 17.4);
-    assert.equal(output.displayValue, '17.4ms');
-    assert.equal(output.score, 100);
   });
 });

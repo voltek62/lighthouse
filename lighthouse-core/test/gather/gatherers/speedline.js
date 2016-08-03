@@ -17,17 +17,18 @@
 
 /* eslint-env mocha */
 
-const SpeedlineGather = require('../../../gather/gatherers/speedline.js');
+const SpeedlineGather = require('../../../gather/computed/speedline.js');
 const assert = require('assert');
 
 describe('Speedline gatherer', () => {
-  it('returns an error debugString on faulty trace data', done => {
+  it('returns an error debugString on faulty trace data', () => {
     const speedlineGather = new SpeedlineGather();
 
-    speedlineGather.afterPass({}, {traceContents: {boo: 'ya'}}).then(_ => {
-      assert.ok(speedlineGather.artifact.debugString);
-      assert.ok(speedlineGather.artifact.debugString.length);
-      done();
+    return speedlineGather.request({boo: 'ya'}).then(_ => {
+      assert.fail(true, true, 'Invalid trace did not throw exception in speedline');
+    }).catch(err => {
+      assert.ok(err);
+      assert.ok(err.message.length);
     });
   });
 
@@ -36,8 +37,7 @@ describe('Speedline gatherer', () => {
     const speedlineGather = new SpeedlineGather();
     const traceContents = require('../../fixtures/traces/progressive-app.json');
 
-    return speedlineGather.afterPass({}, {traceContents}).then(_ => {
-      const speedline = speedlineGather.artifact;
+    return speedlineGather.request(traceContents).then(speedline => {
       return assert.equal(Math.round(speedline.speedIndex), 831);
     });
   });
