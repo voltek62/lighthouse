@@ -18,8 +18,8 @@
 
 const defaultConfig = require('./default.json');
 const recordsFromLogs = require('../lib/network-recorder').recordsFromLogs;
-const CriticalRequestChainsGatherer = require('../gather/gatherers/critical-request-chains');
-const SpeedlineGatherer = require('../gather/gatherers/speedline');
+const CriticalRequestChainsGatherer = require('../gather/computed/critical-request-chains');
+const SpeedlineGatherer = require('../gather/computed/speedline');
 
 const GatherRunner = require('../gather/gather-runner');
 const log = require('../lib/log');
@@ -180,7 +180,7 @@ function expandAudits(audits) {
   });
 }
 
-function expandArtifacts(artifacts, includeSpeedline) {
+function expandArtifacts(artifacts) {
   const expandedArtifacts = Object.assign({}, artifacts);
 
   // currently only trace logs and performance logs should be imported
@@ -196,29 +196,11 @@ function expandArtifacts(artifacts, includeSpeedline) {
     });
   }
 
-  if (includeSpeedline) {
-    const speedline = new SpeedlineGatherer();
-    speedline.afterPass({}, {traceContents: expandedArtifacts.traces.defaultPass.traceContents});
-    expandedArtifacts.Speedline = speedline.artifact;
-  }
-
   if (artifacts.performanceLog) {
-    expandedArtifacts.CriticalRequestChains =
-      parsePerformanceLog(require(artifacts.performanceLog));
+    expandedArtifacts.networkRecords = recordsFromLogs(require(artifacts.performanceLog));
   }
 
   return expandedArtifacts;
-}
-
-function parsePerformanceLog(logs) {
-  // Parse logs for network events
-  const networkRecords = recordsFromLogs(logs);
-
-  // Use critical request chains gatherer to create the critical request chains artifact
-  const criticalRequestChainsGatherer = new CriticalRequestChainsGatherer();
-  criticalRequestChainsGatherer.afterPass({}, {networkRecords});
-
-  return criticalRequestChainsGatherer.artifact;
 }
 
 /**
@@ -242,9 +224,7 @@ class Config {
     this._auditResults = configJSON.auditResults ? Array.from(configJSON.auditResults) : null;
     this._artifacts = null;
     if (configJSON.artifacts) {
-      this._artifacts = expandArtifacts(configJSON.artifacts,
-          // If time-to-interactive is present, add the speedline artifact
-          configJSON.audits && configJSON.audits.find(a => a === 'time-to-interactive'));
+      this._artifacts = expandArtifacts(configJSON.artifacts);
     }
     this._aggregations = configJSON.aggregations ? Array.from(configJSON.aggregations) : null;
   }

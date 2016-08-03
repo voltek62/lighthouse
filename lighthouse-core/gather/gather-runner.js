@@ -198,7 +198,7 @@ class GatherRunner {
               .then(_ => this.afterPass(runOptions))
               .then(loadData => {
                 // Need to manually merge traces property before
-                // merging loadDat into tracingData to avoid data loss.
+                // merging loadData into tracingData to avoid data loss.
                 Object.assign(loadData.traces, tracingData.traces);
                 Object.assign(tracingData, loadData);
               })
@@ -216,7 +216,9 @@ class GatherRunner {
       })
       .then(_ => {
         // Collate all the gatherer results.
-        const artifacts = Object.assign({}, tracingData);
+        const computedArtifacts = this.instantiateComputedArtifacts();
+        const artifacts = Object.assign(computedArtifacts, tracingData);
+
         passes.forEach(pass => {
           pass.gatherers.forEach(gatherer => {
             artifacts[gatherer.name] = gatherer.artifact;
@@ -228,6 +230,20 @@ class GatherRunner {
 
   static getGathererClass(gatherer) {
     return require(`./gatherers/${gatherer}`);
+  }
+
+  static instantiateComputedArtifacts() {
+    let computedArtifacts = {};
+    var normalizedPath = require('path').join(__dirname, 'computed');
+    require('fs').readdirSync(normalizedPath).forEach(function(file) {
+      const ArtifactClass = require('./computed/' + file);
+      const artifact = new ArtifactClass();
+      // define the request* function that will be exposed on `artifacts`
+      computedArtifacts['request' + artifact.name] = function(artifacts) {
+        return artifact.request(artifacts);
+      };
+    });
+    return computedArtifacts;
   }
 
   static instantiateGatherers(passes) {
