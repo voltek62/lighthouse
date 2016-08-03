@@ -14,25 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 'use strict';
 
-const ComputedArtifact = require('./computed-artifact');
-const speedline = require('speedline');
-
-class Speedline extends ComputedArtifact {
-
-  get name() {
-    return 'Speedline';
+class ComputedArtifact {
+  constructor() {
+    this.cache = undefined;
   }
 
-  /**
-   * @return {!Promise}
-   */
-  request(trace) {
-    return new Promise((resolve, reject) => {
-      resolve(speedline(trace.traceContents || trace));
-    });
+  request() {
+    throw new Error('request() not implemented for computed Artifact' + this.name);
   }
 }
 
-module.exports = Speedline;
+module.exports = ComputedArtifact;
