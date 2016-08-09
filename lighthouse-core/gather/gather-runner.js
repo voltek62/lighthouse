@@ -116,21 +116,32 @@ class GatherRunner {
 
     if (config.trace) {
       pass = pass.then(_ => {
-        log.log('status', `Gathering: trace "${traceName}"`);
+        log.log('status', 'Retrieving trace');
         return driver.endTrace().then(traceContents => {
-          loadData.traces[traceName] = {traceContents};
-          log.log('statusEnd', `Gathering: trace "${traceName}"`);
+          // Before Chrome 54.0.2816 (codereview.chromium.org/2161583004),
+          // traceContents was an array of trace events. After this point,
+          // traceContents is an object with a traceEvents property. Normalize
+          // to new format.
+          if (Array.isArray(traceContents)) {
+            traceContents = {
+              traceEvents: traceContents
+            };
+          }
+
+          loadData.traces[traceName] = traceContents;
+          loadData.traceEvents = traceContents.traceEvents;
+          log.verbose('statusEnd', 'Retrieving trace');
         });
       });
     }
 
     if (config.network) {
       pass = pass.then(_ => {
-        const status = 'Gathering: network records';
+        const status = 'Retrieving network records';
         log.log('status', status);
         return driver.endNetworkCollect().then(networkRecords => {
           loadData.networkRecords = networkRecords;
-          log.log('statusEnd', status);
+          log.verbose('statusEnd', status);
         });
       });
     }
@@ -138,13 +149,10 @@ class GatherRunner {
     return gatherers
         .reduce((chain, gatherer) => {
           return chain.then(_ => {
-            const status = `Gathering: ${gatherer.name}`;
+            const status = `Retrieving: ${gatherer.name}`;
             log.log('status', status);
-            if (config.trace) {
-              loadData.traceContents = loadData.traces[traceName].traceContents;
-            }
             return Promise.resolve(gatherer.afterPass(options, loadData)).then(ret => {
-              log.log('statusEnd', status);
+              log.verbose('statusEnd', status);
               return ret;
             });
           });
@@ -197,10 +205,9 @@ class GatherRunner {
               .then(_ => this.pass(runOptions))
               .then(_ => this.afterPass(runOptions))
               .then(loadData => {
-                // Need to manually merge traces property before
-                // merging loadData into tracingData to avoid data loss.
-                Object.assign(loadData.traces, tracingData.traces);
-                Object.assign(tracingData, loadData);
+                // Merge pass trace and network data into tracingData.
+                Object.assign(tracingData.traces, loadData.traces);
+                tracingData.networkRecords = loadData.networkRecords;
               })
               .then(_ => this.tearDown(runOptions));
         }, Promise.resolve());

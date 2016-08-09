@@ -29,7 +29,7 @@ describe('Performance: time-to-interactive audit', () => {
     return Audit.audit({
       traces: {
         [Audit.DEFAULT_TRACE]: {
-          traceContents: '[{"pid": 15256,"tid": 1295,"t'
+          traceEvents: '[{"pid": 15256,"tid": 1295,"t'
         }
       },
       requestSpeedline() {
@@ -45,7 +45,7 @@ describe('Performance: time-to-interactive audit', () => {
     let artifacts = mockArtifacts;
     artifacts.traces = {
       [Audit.DEFAULT_TRACE]: {
-        traceContents: pwaTrace
+        traceEvents: pwaTrace
       }
     };
 

@@ -70,7 +70,7 @@ class Runner {
         const status = `Evaluating: ${audit.meta.description}`;
         log.log('status', status);
         return Promise.resolve(audit.audit(artifacts)).then(ret => {
-          log.log('statusEnd', status);
+          log.verbose('statusEnd', status);
           return ret;
         });
       })));
@@ -85,10 +85,20 @@ class Runner {
     // Only run aggregations if needed.
     if (config.aggregations) {
       run = run
-          .then(results => Aggregator.aggregate(config.aggregations, results))
-          .then(aggregations => {
+          .then(auditResults => Promise.all([
+            auditResults,
+            Aggregator.aggregate(config.aggregations, auditResults)
+          ]))
+          .then(results => {
+            const audits = results[0];
+            const aggregations = results[1];
+            const formattedAudits = audits.reduce((formatted, audit) => {
+              formatted[audit.name] = audit;
+              return formatted;
+            }, {});
             return {
               url: opts.url,
+              audits: formattedAudits,
               aggregations
             };
           });

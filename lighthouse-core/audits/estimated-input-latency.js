@@ -80,7 +80,7 @@ class EstimatedInputLatency extends Audit {
    */
   static audit(artifacts) {
     const trace = artifacts.traces[this.DEFAULT_TRACE] &&
-      artifacts.traces[this.DEFAULT_TRACE].traceContents;
+        artifacts.traces[this.DEFAULT_TRACE].traceEvents;
 
     return artifacts.requestSpeedline(trace)
       .then(speedline => EstimatedInputLatency.calculate(speedline, trace))

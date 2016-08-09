@@ -21,7 +21,6 @@ const assert = require('assert');
 
 const pwaTrace = require('../fixtures/traces/progressive-app.json');
 
-
 let computedArtifacts = GatherRunner.instantiateComputedArtifacts();
 
 function generateArtifactsWithTrace(trace) {
@@ -35,16 +34,17 @@ function generateArtifactsWithTrace(trace) {
 
 describe('Performance: estimated-input-latency audit', () => {
   it('scores a -1 with invalid trace data', () => {
-    const artifacts = generateArtifactsWithTrace({traceContents: '[{"pid": 15256,"tid": 1295,"t'});
-    return Audit.audit(artifacts).then(output => {
+    const artifacts = generateArtifactsWithTrace({traceEvents: '[{"pid": 15256,"tid": 1295,"t'});
+    Audit.audit(artifacts).then(output => {
       assert.equal(output.score, -1);
       assert(output.debugString);
     });
   });
 
-  it('evaluates valid input correctly', () => {
-    const artifacts = generateArtifactsWithTrace({traceContents: pwaTrace});
-    return Audit.audit(artifacts).then(output => {
+  it.only('evaluates valid input correctly', () => {
+    const artifacts = generateArtifactsWithTrace({traceEvents: pwaTrace});
+    Audit.audit(artifacts).then(output => {
+      assert.equal(output.debugString, undefined);
       assert.equal(output.rawValue, 17.4);
       assert.equal(output.displayValue, '17.4ms');
       assert.equal(output.score, 100);
