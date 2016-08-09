@@ -39,7 +39,7 @@ class EstimatedInputLatency extends Audit {
     };
   }
 
-  static calculate(speedline) {
+  static calculate(speedline, trace) {
     // Use speedline's first paint as start of range for input latency check.
     const startTime = speedline.first;
 
@@ -82,12 +82,14 @@ class EstimatedInputLatency extends Audit {
     const trace = artifacts.traces[this.DEFAULT_TRACE] &&
       artifacts.traces[this.DEFAULT_TRACE].traceContents;
 
-    return artifacts.requestSpeedline(trace).then(EstimatedInputLatency.calculate).catch(err => {
-      return EstimatedInputLatency.generateAuditResult({
-        rawValue: -1,
-        debugString: 'Speedline unable to parse trace contents: ' + err.message
+    return artifacts.requestSpeedline(trace)
+      .then(speedline => EstimatedInputLatency.calculate(speedline, trace))
+      .catch(err => {
+        return EstimatedInputLatency.generateAuditResult({
+          rawValue: -1,
+          debugString: 'Speedline unable to parse trace contents: ' + err.message
+        });
       });
-    });
   }
 }
 

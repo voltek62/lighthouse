@@ -41,7 +41,7 @@ describe('Performance: time-to-interactive audit', () => {
     });
   });
 
-  it.only('evaluates valid input correctly', () => {
+  it('evaluates valid input correctly', () => {
     let artifacts = mockArtifacts;
     artifacts.traces = {
       [Audit.DEFAULT_TRACE]: {
