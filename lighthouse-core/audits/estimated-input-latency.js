@@ -35,7 +35,7 @@ class EstimatedInputLatency extends Audit {
       name: 'estimated-input-latency',
       description: 'Estimated Input Latency',
       optimalValue: SCORING_POINT_OF_DIMINISHING_RETURNS.toLocaleString() + 'ms',
-      requiredArtifacts: ['traceContents', 'Speedline']
+      requiredArtifacts: ['traceContents']
     };
   }
 

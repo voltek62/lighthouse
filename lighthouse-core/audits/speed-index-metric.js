@@ -36,7 +36,7 @@ class SpeedIndexMetric extends Audit {
       name: 'speed-index-metric',
       description: 'Speed Index',
       optimalValue: SCORING_POINT_OF_DIMINISHING_RETURNS.toLocaleString(),
-      requiredArtifacts: ['Speedline']
+      requiredArtifacts: ['traceContents']
     };
   }
 
@@ -49,12 +49,13 @@ class SpeedIndexMetric extends Audit {
   static audit(artifacts) {
     const trace = artifacts.traces[this.DEFAULT_TRACE];
     if (typeof trace === 'undefined') {
-      return Promise.resolve(SpeedIndexMetric.generateAuditResult({
+      return SpeedIndexMetric.generateAuditResult({
         rawValue: -1,
         debugString: 'No trace found to generate screenshots'
-      }));
+      });
     }
 
+    // run speedline
     return artifacts.requestSpeedline(trace).then(speedline => {
       if (speedline.frames.length === 0) {
         return SpeedIndexMetric.generateAuditResult({
