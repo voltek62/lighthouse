@@ -41,7 +41,7 @@ describe('Performance: estimated-input-latency audit', () => {
     });
   });
 
-  it.only('evaluates valid input correctly', () => {
+  it('evaluates valid input correctly', () => {
     const artifacts = generateArtifactsWithTrace({traceEvents: pwaTrace});
     Audit.audit(artifacts).then(output => {
       assert.equal(output.debugString, undefined);

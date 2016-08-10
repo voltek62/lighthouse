@@ -28,7 +28,7 @@ class TTIMetric extends Audit {
       name: 'time-to-interactive',
       description: 'Time To Interactive (alpha)',
       optimalValue: SCORING_POINT_OF_DIMINISHING_RETURNS.toLocaleString(),
-      requiredArtifacts: ['traceContents', 'speedline']
+      requiredArtifacts: ['traceContents']
     };
   }
 
@@ -58,7 +58,7 @@ class TTIMetric extends Audit {
    */
   static audit(artifacts) {
     const trace = artifacts.traces[Audit.DEFAULT_TRACE];
-    const pendingSpeedline = artifacts.requestSpeedline(trace.traceContents);
+    const pendingSpeedline = artifacts.requestSpeedline(trace.traceEvents);
     const pendingFMP = FMPMetric.audit(artifacts);
 
     // We start looking at Math.Max(FMPMetric, visProgress[0.85])
@@ -72,8 +72,8 @@ class TTIMetric extends Audit {
 
       // Process the trace
       const tracingProcessor = new TracingProcessor();
-      const traceContents = artifacts.traces[Audit.DEFAULT_TRACE].traceEvents;
-      const model = tracingProcessor.init(traceContents);
+      const traceEvents = artifacts.traces[Audit.DEFAULT_TRACE].traceEvents;
+      const model = tracingProcessor.init(traceEvents);
       const endOfTraceTime = model.bounds.max;
 
       // TODO: Wait for DOMContentLoadedEndEvent
@@ -115,7 +115,7 @@ class TTIMetric extends Audit {
         }
         // Get our expected latency for the time window
         const latencies = TracingProcessor.getRiskToResponsiveness(
-          model, trace.traceContents, startTime, endTime, percentiles);
+          model, traceEvents, startTime, endTime, percentiles);
         const estLatency = latencies[0].time.toFixed(2);
         foundLatencies.push({
           estLatency: estLatency,
