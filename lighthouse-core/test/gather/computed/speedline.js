@@ -27,7 +27,7 @@ describe('Speedline gatherer', () => {
 
     return speedlineGather.request({traceEvents: {boo: 'ya'}}).then(_ => {
       assert.fail(true, true, 'Invalid trace did not throw exception in speedline');
-    }).catch(err => {
+    }, err => {
       assert.ok(err);
       assert.ok(err.message.length);
     });
@@ -46,19 +46,20 @@ describe('Speedline gatherer', () => {
     // TODO these gather instances could be shared across tests for speed
     const speedlineGather = new SpeedlineGather();
     let start;
+    const trace = {traceEvents: pwaTrace};
     // repeat with the same input data twice
     return Promise.resolve()
-      .then(_ => speedlineGather.request(pwaTrace))
+      .then(_ => speedlineGather.request(trace))
       .then(_ => {
         start = Date.now();
       })
-      .then(_ => speedlineGather.request(pwaTrace))
+      .then(_ => speedlineGather.request(trace))
       .then(speedline => {
         // on a MacBook Air, one run is  1000-1500ms
         assert.ok(Date.now() - start < 50, 'Quick results come from the cache');
 
-        assert.ok(speedlineGather.cache.has(pwaTrace), 'Cache reports a match');
-        assert.equal(speedlineGather.cache.get(pwaTrace), speedline, 'Cache match matches');
+        assert.ok(speedlineGather.cache.has(trace), 'Cache reports a match');
+        assert.equal(speedlineGather.cache.get(trace), speedline, 'Cache match matches');
 
         return assert.equal(Math.round(speedline.speedIndex), 831);
       });

@@ -37,10 +37,6 @@ class ScreenshotFilmstrip extends ComputedArtifact {
    * @return {!Promise}
   */
   getScreenshots(traceData) {
-    // if (this.cache) {
-    //   return this.cache;
-    // }
-
     const model = new DevtoolsTimelineModel(traceData);
     const filmStripFrames = model.filmStripModel().frames();
 
@@ -50,7 +46,6 @@ class ScreenshotFilmstrip extends ComputedArtifact {
         timestamp: frame.timestamp,
         datauri: images[i]
       }));
-      this.cache = result;
       return result;
     });
   }

@@ -34,10 +34,10 @@ function generateArtifactsWithTrace(trace) {
 
 describe('Performance: estimated-input-latency audit', () => {
   it('scores a -1 with invalid trace data', () => {
-    const artifacts = generateArtifactsWithTrace({traceEvents: '[{"pid": 15256,"tid": 1295,"t'});
+    const artifacts = generateArtifactsWithTrace({traceEvents: [{pid: 15256, tid: 1295, t: 5}]});
     Audit.audit(artifacts).then(output => {
       assert.equal(output.score, -1);
-      assert(output.debugString);
+      assert.ok(output.debugString);
     });
   });
 

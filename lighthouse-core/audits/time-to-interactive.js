@@ -58,11 +58,13 @@ class TTIMetric extends Audit {
    */
   static audit(artifacts) {
     const trace = artifacts.traces[Audit.DEFAULT_TRACE];
-    const pendingSpeedline = artifacts.requestSpeedline(trace.traceEvents);
+    const pendingSpeedline = artifacts.requestSpeedline(trace);
     const pendingFMP = FMPMetric.audit(artifacts);
 
     // We start looking at Math.Max(FMPMetric, visProgress[0.85])
-    return Promise.all([pendingSpeedline, pendingFMP]).then(([speedline, fmpResult]) => {
+    return Promise.all([pendingSpeedline, pendingFMP]).then(results => {
+      const speedline = results[0];
+      const fmpResult = results[1];
       if (fmpResult.rawValue === -1) {
         return generateError(fmpResult.debugString);
       }
@@ -174,6 +176,6 @@ function generateError(err) {
     value: -1,
     rawValue: -1,
     optimalValue: TTIMetric.meta.optimalValue,
-    debugString: err
+    debugString: err.message || err
   });
 }
