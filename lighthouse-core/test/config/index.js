@@ -127,23 +127,6 @@ describe('Config', () => {
     return assert.equal(typeof config.audits[0], 'function');
   });
 
-  it('expands artifacts', () => {
-    const config = new Config({
-      artifacts: {
-        traces: {
-          defaultPass: path.resolve(__dirname, '../fixtures/traces/trace-user-timings.json')
-        },
-        performanceLog: path.resolve(__dirname, '../fixtures/perflog.json')
-      }
-    });
-    const traceUserTimings = require('../fixtures/traces/trace-user-timings.json');
-    assert.deepStrictEqual(config.artifacts.traces.defaultPass.traceEvents, traceUserTimings);
-    assert.ok(config.artifacts.CriticalRequestChains);
-    assert.ok(config.artifacts.CriticalRequestChains['93149.1']);
-    assert.ok(config.artifacts.CriticalRequestChains['93149.1'].request);
-    assert.ok(config.artifacts.CriticalRequestChains['93149.1'].children);
-  });
-
   it('handles traces with no TracingStartedInPage events', () => {
     const config = new Config({
       artifacts: {

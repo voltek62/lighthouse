@@ -261,4 +261,34 @@ describe('GatherRunner', function() {
           assert.ok(t2.called);
         });
   });
+
+  it('can create computed artifacts', () => {
+    const computedArtifacts = GatherRunner.instantiateComputedArtifacts();
+    assert.ok(Object.keys(computedArtifacts).length, 'there are a few computed artifacts');
+    Object.keys(computedArtifacts).forEach(artifactRequest => {
+      assert.equal(typeof computedArtifacts[artifactRequest], 'function');
+    });
+  });
+
+
+  it('will instantiate computed artifacts during a run', () => {
+    const passes = [{
+      network: true,
+      trace: true,
+      traceName: 'firstPass',
+      loadPage: true,
+      gatherers: [new TestGatherer()]
+    }];
+
+    return GatherRunner.run(passes, {driver: fakeDriver, url: 'https://example.com', flags: {}})
+        .then(artifacts => {
+          const p = artifacts.requestCriticalRequestChains(artifacts.networkRecords);
+          return p.then(chains => {
+            // fakeDriver will include networkRecords built from fixtures/perflog.json
+            assert.ok(chains['93149.1']);
+            assert.ok(chains['93149.1'].request);
+            assert.ok(chains['93149.1'].children);
+          });
+        });
+  });
 });
