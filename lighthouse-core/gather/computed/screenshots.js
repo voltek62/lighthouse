@@ -56,7 +56,14 @@ class ScreenshotFilmstrip extends ComputedArtifact {
   }
 
   request(trace) {
-    return this.getScreenshots(trace);
+    if (this.cache.has(trace)) {
+      return this.cache.get(trace);
+    }
+
+    return this.getScreenshots(trace).then(screenshots => {
+      this.cache.set(trace, screenshots);
+      return screenshots;
+    });
   }
 }
 

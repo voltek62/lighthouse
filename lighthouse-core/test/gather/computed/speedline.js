@@ -41,4 +41,26 @@ describe('Speedline gatherer', () => {
       return assert.equal(Math.round(speedline.speedIndex), 831);
     });
   });
+
+  it('uses a cache', () => {
+    // TODO these gather instances could be shared across tests for speed
+    const speedlineGather = new SpeedlineGather();
+    let start;
+    // repeat with the same input data twice
+    return Promise.resolve()
+      .then(_ => speedlineGather.request(pwaTrace))
+      .then(_ => {
+        start = Date.now();
+      })
+      .then(_ => speedlineGather.request(pwaTrace))
+      .then(speedline => {
+        // on a MacBook Air, one run is  1000-1500ms
+        assert.ok(Date.now() - start < 50, 'Quick results come from the cache');
+
+        assert.ok(speedlineGather.cache.has(pwaTrace), 'Cache reports a match');
+        assert.equal(speedlineGather.cache.get(pwaTrace), speedline, 'Cache match matches');
+
+        return assert.equal(Math.round(speedline.speedIndex), 831);
+      });
+  });
 });

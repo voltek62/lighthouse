@@ -25,9 +25,6 @@ let screenshotsGather = new ScreenshotsGather();
 
 describe('Screenshot gatherer', () => {
   it('returns an artifact for a real trace', () => {
-    // Currently this test must rely on knowing the phase hook for the gatherer.
-    // A little unfortunate, but we need a "run scheduler with this gatherer, this mocked driver,
-    // and this trace" test class to do that right
     return screenshotsGather.request(pwaTrace).then(screenshots => {
       assert.ok(Array.isArray(screenshots));
       assert.equal(screenshots.length, 7);

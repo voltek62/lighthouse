@@ -29,8 +29,16 @@ class Speedline extends ComputedArtifact {
    * @return {!Promise}
    */
   request(trace) {
+    if (this.cache.has(trace)) {
+      return this.cache.get(trace);
+    }
+
     return new Promise((resolve, reject) => {
-      resolve(speedline(trace.traceContents || trace));
+      trace = trace.traceContents || trace;
+      speedline(trace).then(speedlineResults => {
+        this.cache.set(trace, speedlineResults);
+        resolve(speedlineResults);
+      }).catch(err => resolve(err));
     });
   }
 }

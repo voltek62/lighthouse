@@ -19,7 +19,7 @@
 
 class ComputedArtifact {
   constructor() {
-    this.cache = undefined;
+    this.cache = new Map();
   }
 
   request() {
