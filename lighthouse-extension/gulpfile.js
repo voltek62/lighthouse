@@ -20,9 +20,9 @@ const audits = fs.readdirSync(path.join(__dirname, '../', 'lighthouse-core/audit
     .filter(f => /\.js$/.test(f))
     .map(f => `../lighthouse-core/audits/${f.replace(/\.js$/, '')}`);
 
-const gatherers = fs.readdirSync(path.join(__dirname, '../', 'lighthouse-core/driver/gatherers/'))
+const gatherers = fs.readdirSync(path.join(__dirname, '../', 'lighthouse-core/gather/gatherers/'))
     .filter(f => /\.js$/.test(f))
-    .map(f => `../lighthouse-core/driver/gatherers/${f.replace(/\.js$/, '')}`);
+    .map(f => `../lighthouse-core/gather/gatherers/${f.replace(/\.js$/, '')}`);
 
 gulp.task('extras', () => {
   return gulp.src([
@@ -97,7 +97,7 @@ gulp.task('browserify', () => {
     'app/src/report-loader.js'
   ], {read: false})
     .pipe(tap(file => {
-      let bundle = browserify(file.path, {debug: true})
+      let bundle = browserify(file.path) // , {debug: true})
       // Fix an issue with Babelified code that doesn't brfs well.
       .transform('./fs-transform', {
         global: true
@@ -114,11 +114,12 @@ gulp.task('browserify', () => {
         bundle.transform('./dtm-transform.js', {
           global: true
         })
-        .ignore('chrome-remote-interface');
+        .ignore('chrome-remote-interface')
+        .ignore('source-map');
 
         // Expose the audits and gatherers so they can be dynamically loaded.
         const corePath = '../lighthouse-core/';
-        const driverPath = `${corePath}driver/`;
+        const driverPath = `${corePath}gather/`;
         audits.forEach(audit => {
           bundle = bundle.require(audit, {expose: audit.replace(corePath, '../')});
         });
@@ -155,7 +156,7 @@ gulp.task('watch', ['lint', 'browserify', 'html', 'copyReportScripts'], () => {
     '*.js',
     'app/src/**/*.js',
     '../lighthouse-core/**/*.js'
-  ], ['browserify', 'lint']);
+  ], ['browserify']);
 });
 
 gulp.task('package', function() {

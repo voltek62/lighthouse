@@ -48,16 +48,6 @@ cd lighthouse
 # will be cleaner soon.
 cd lighthouse-core
 npm install
-cd ../lighthouse-cli/
-npm install
-# npm link # nah...
-# just use `node lighthouse-cli/index.js` for now
-
-# probably very temporary
-cd lighthouse-core
-npm link
-cd ../lighthouse-cli/
-npm link lighthouse-core
 ```
 
 ## Custom run configuration
@@ -66,33 +56,35 @@ You can supply your own run configuration to customize what audits you want deta
 
 ## Trace processing
 
-Lighthouse can be used to analyze trace and performance data collected from other tools (like WebPageTest and ChromeDriver). The `traceContents` and `performanceLog` artifact items can be provided using a string for the absolute path on disk. The perf log is captured from the Network domain (a la ChromeDriver's [`enableNetwork` option](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-perfLoggingPrefs-object) and reformatted slightly. As an example, here's a trace-only run that's reporting on user timings and critical request chains:
+Lighthouse can be used to analyze trace and performance data collected from other tools (like WebPageTest and ChromeDriver). The `traces` and `performanceLog` artifact items can be provided using a string for the absolute path on disk. The perf log is captured from the Network domain (a la ChromeDriver's [`enableNetwork` option](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-perfLoggingPrefs-object) and reformatted slightly. As an example, here's a trace-only run that's reporting on user timings and critical request chains:
 
 ##### `config.json`
 ```js
 {
- "audits": [
-  "user-timings",
-  "critical-request-chains"
- ],
+  "audits": [
+    "user-timings",
+    "critical-request-chains"
+  ],
 
- "artifacts": {
-   "traceContents": "$HOME/code/lighthouse-core/test/fixtures/traces/trace-user-timings.json",
-   "performanceLog": "$HOME/code/lighthouse-core/test/fixtures/traces/perflog.json"
- },
+  "artifacts": {
+    "traces": {
+      "defaultPass": "/User/me/lighthouse/lighthouse-core/test/fixtures/traces/trace-user-timings.json"
+    },
+    "performanceLog": "/User/me/lighthouse/lighthouse-core/test/fixtures/traces/perflog.json"
+  },
 
- "aggregations": [{
-   "name": "Performance Metrics",
-   "description": "These encapsulate your app's performance.",
-   "scored": false,
-   "categorizable": false,
-   "items": [{
-     "criteria": {
-       "user-timings": { "rawValue": 0, "weight": 1 },
-       "critical-request-chains": { "rawValue": 0, "weight": 1}
-     }
-   }]
- }]
+  "aggregations": [{
+    "name": "Performance Metrics",
+    "description": "These encapsulate your app's performance.",
+    "scored": false,
+    "categorizable": false,
+    "items": [{
+      "criteria": {
+        "user-timings": { "rawValue": 0, "weight": 1 },
+        "critical-request-chains": { "rawValue": 0, "weight": 1}
+      }
+    }]
+  }]
 }
 ```
 
@@ -158,7 +150,7 @@ The same audits are run against from a Chrome extension. See [./extension](https
 _Some incomplete notes_
 
 #### Components
-* **Driver** - Interfaces with Chrome Debugging Protocol
+* **Driver** - Interfaces with [Chrome Debugging Protocol](https://developer.chrome.com/devtools/docs/debugger-protocol)  ([API viewer](https://chromedevtools.github.io/debugger-protocol-viewer/))
 * **Gathers** - Requesting data from the browser (and maybe post-processing)
 * **Artifacts** - The output of gatherers
 * **Audits** - Non-performance evaluations of capabilities and issues. Includes a raw value and score of that value.
@@ -231,6 +223,7 @@ The traceviewer-based trace processor from [node-big-rig](https://github.com/Goo
 **To update traceviewer source:**
 
 ```sh
+cd lighthouse-core
 # if not already there, clone catapult and copy license over
 git clone --depth=1 https://github.com/catapult-project/catapult.git third_party/src/catapult
 cp third_party/src/catapult/LICENSE third_party/traceviewer-js/
