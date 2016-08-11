@@ -270,7 +270,6 @@ describe('GatherRunner', function() {
     });
   });
 
-
   it('will instantiate computed artifacts during a run', () => {
     const passes = [{
       network: true,

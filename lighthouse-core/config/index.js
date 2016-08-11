@@ -18,8 +18,6 @@
 
 const defaultConfig = require('./default.json');
 const recordsFromLogs = require('../lib/network-recorder').recordsFromLogs;
-const CriticalRequestChainsGatherer = require('../gather/computed/critical-request-chains');
-const SpeedlineGatherer = require('../gather/computed/speedline');
 
 const GatherRunner = require('../gather/gather-runner');
 const log = require('../lib/log');
