@@ -35,7 +35,7 @@ function generateArtifactsWithTrace(trace) {
 describe('Performance: estimated-input-latency audit', () => {
   it('scores a -1 with invalid trace data', () => {
     const artifacts = generateArtifactsWithTrace({traceEvents: [{pid: 15256, tid: 1295, t: 5}]});
-    Audit.audit(artifacts).then(output => {
+    return Audit.audit(artifacts).then(output => {
       assert.equal(output.score, -1);
       assert.ok(output.debugString);
     });
@@ -43,7 +43,7 @@ describe('Performance: estimated-input-latency audit', () => {
 
   it('evaluates valid input correctly', () => {
     const artifacts = generateArtifactsWithTrace({traceEvents: pwaTrace});
-    Audit.audit(artifacts).then(output => {
+    return Audit.audit(artifacts).then(output => {
       assert.equal(output.debugString, undefined);
       assert.equal(output.rawValue, 17.4);
       assert.equal(output.displayValue, '17.4ms');
