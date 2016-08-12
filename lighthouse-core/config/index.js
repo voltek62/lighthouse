@@ -118,7 +118,11 @@ function filterPasses(passes, audits) {
     freshPass.gatherers = freshPass.gatherers.filter(gatherer => {
       try {
         const GathererClass = GatherRunner.getGathererClass(gatherer);
-        return requiredGatherers.has(GathererClass.name);
+        const isGatherRequiredByAudits = requiredGatherers.has(GathererClass.name);
+        if (isGatherRequiredByAudits === false) {
+          log.warn('config', `Skipping ${GathererClass.name} gatherer as no audit requires it.`);
+        }
+        return isGatherRequiredByAudits;
       } catch (requireError) {
         throw new Error(`Unable to locate gatherer: ${gatherer}`);
       }

@@ -1,13 +1,14 @@
 {
   "passes": [{
     "loadPage": true,
-    "gatherers": []
+    "gatherers": [
+      "viewport"
+    ]
   },{
     "loadPage": true,
     "gatherers": [
       "service-worker",
-      "offline",
-      "viewport"
+      "offline"
     ]
   }],
 

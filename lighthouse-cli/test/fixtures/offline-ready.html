@@ -35,8 +35,12 @@
 
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/offline-ready-sw.js').then(function() {
-      console.log('service worker is is all cool.');
+    navigator.serviceWorker.register('/offline-ready-sw.js').then(function(registration) {
+      console.log('service worker registration complete');
+
+      registration.addEventListener('statechange',  e => {
+        console.log('sw registration is now', e.target.state);
+      });
     }).catch(function(e) {
       console.error('service worker is not so cool.', e);
       throw e;
