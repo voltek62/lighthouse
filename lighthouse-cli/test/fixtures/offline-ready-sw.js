@@ -17,50 +17,74 @@
 
 /* global caches, fetch, self */
 
-var VERSION = '15';
-var filesToCache = [
+// This service-worker courtesy of googlechrome.github.io/samples/service-worker/basic/index.html
+
+// A list of local resources we always want to be cached.
+const PRECACHE_URLS = [
   './offline-ready.html',
   './offline-ready-sw.js',
-  './smoketest-config.json'
+  './smoketest-offline-config.json'
 ];
 
-this.addEventListener('install', function(event) {
+function pLog() {
+  return function(obj) {
+    console.log('' + Date.now() + 'I just received' + JSON.stringify(obj));
+    return obj;
+  };
+}
+// Names of the two caches used in this version of the service worker.
+// Change to v2, etc. when you update any of the local resources, which will
+// in turn trigger the install event again.
+const PRECACHE = 'precache-v1';
+const RUNTIME = 'runtime';
+
+
+
+// The install handler takes care of precaching the resources we always need.
+self.addEventListener('install', event => {
+  var populateCaches = caches.open(PRECACHE).then(pLog())
+      .then(cache => cache.addAll(PRECACHE_URLS)).then(pLog());
+
+  event.waitUntil(populateCaches);
+  event.waitUntil(self.skipWaiting());
+});
+
+
+// The activate handler takes care of cleaning up old caches.
+self.addEventListener('activate', event => {
+  const currentCaches = [PRECACHE, RUNTIME];
   event.waitUntil(
-    caches.open(VERSION).then(cache => {
-      return cache.addAll(filesToCache).then(_ => {
-        self.skipWaiting();
-      });
-    })
+    caches.keys().then(cacheNames => {
+      return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
+    }).then(cachesToDelete => {
+      return Promise.all(cachesToDelete.map(cacheToDelete => {
+        return caches.delete(cacheToDelete);
+      }));
+    }).then(() => self.clients.claim())
   );
 });
 
-this.addEventListener('fetch', function(e) {
-  e.respondWith(caches.match(e.request).then(res => {
-    // If there is no match in the cache, we get undefined back,
-    // in that case go to the network!
-    return res ? res : handleNoCacheMatch(e);
-  }));
-});
+// The fetch handler serves responses for same-origin resources from a cache.
+// If no response is found, it populates the runtime cache with the response
+// from the network before returning it to the page.
+self.addEventListener('fetch', event => {
+  // Skip cross-origin requests, like those for Google Analytics.
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
 
-this.addEventListener('activate', function(e) {
-  e.waitUntil(caches.keys().then(keys => {
-    return Promise.all(keys.map(k => {
-      if (k !== VERSION) {
-        return caches.delete(k);
-      }
-      return undefined;
-    })).then(_ => {
-      return this.clients.claim();
-    });
-  }));
+        return caches.open(RUNTIME).then(cache => {
+          return fetch(event.request).then(response => {
+            // Put a copy of the response in the runtime cache.
+            return cache.put(event.request, response.clone()).then(() => {
+              return response;
+            });
+          });
+        });
+      })
+    );
+  }
 });
-
-// fetch from network and put into our cache
-function handleNoCacheMatch(e) {
-  return fetch(e.request).then(res => {
-    return caches.open(VERSION).then(cache => {
-      cache.put(e.request, res.clone());
-      return res;
-    });
-  });
-}
