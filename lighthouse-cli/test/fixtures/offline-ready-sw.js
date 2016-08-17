@@ -26,29 +26,21 @@ const PRECACHE_URLS = [
   './smoketest-offline-config.json'
 ];
 
-function pLog() {
-  return function(obj) {
-    console.log('' + Date.now() + 'I just received' + JSON.stringify(obj));
-    return obj;
-  };
-}
 // Names of the two caches used in this version of the service worker.
 // Change to v2, etc. when you update any of the local resources, which will
 // in turn trigger the install event again.
 const PRECACHE = 'precache-v1';
 const RUNTIME = 'runtime';
 
-
-
 // The install handler takes care of precaching the resources we always need.
 self.addEventListener('install', event => {
-  var populateCaches = caches.open(PRECACHE).then(pLog())
-      .then(cache => cache.addAll(PRECACHE_URLS)).then(pLog());
+  self.skipWaiting();
+
+  const populateCaches = caches.open(PRECACHE)
+      .then(cache => cache.addAll(PRECACHE_URLS));
 
   event.waitUntil(populateCaches);
-  event.waitUntil(self.skipWaiting());
 });
-
 
 // The activate handler takes care of cleaning up old caches.
 self.addEventListener('activate', event => {
