@@ -47,3 +47,13 @@
     });
   }
 </script>
+
+<script>
+  // Lighthouse will move on to the next thing at onload, however this will race with
+  // the cache population in the serviceworker's install phase.
+  // We use an image that takes 2-seconds to load to delay window onload.
+  //   (Also about that document.write.. Bless me Souders for I have sinned...)
+  document.write(`
+    <img src="http://1.cuzillion.com/bin/resource.cgi?type=gif&sleep=2&n=1&t=${Date.now()}">
+    `);
+</script>
