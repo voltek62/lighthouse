@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-cd lighthouse-cli/test/fixtures && python -m SimpleHTTPServer 10200 &
-cd lighthouse-cli/test/fixtures && python -m SimpleHTTPServer 10404 &
+node lighthouse-cli/test/fixtures/static-server.js &
+
+sleep 0.5s
 
 NODE=$([ $(node -v | grep -E "v4") ] && echo "node --harmony" || echo "node")
 config="$PWD/lighthouse-cli/test/fixtures/smoketest-offline-config.json"
@@ -30,10 +31,10 @@ if ! grep -q "$offline200result: false" results; then
   exit 1
 fi
 
-sleep 1s
+sleep 0.5s
 
 # run minimal lighthouse run against a basic offline-sw page
-$NODE lighthouse-cli --config-path=$config --quiet http://localhost:10404/offline-ready.html > results
+$NODE lighthouse-cli --config-path=$config --quiet http://localhost:10503/offline-ready.html > results
 
 if ! grep -q "$offline200result: true" results; then
   echo "Fail! offline ready site did not work while offline"
