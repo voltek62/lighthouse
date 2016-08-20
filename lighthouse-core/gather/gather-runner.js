@@ -250,7 +250,7 @@ class GatherRunner {
       .then(_ => {
         // Collate all the gatherer results.
         const computedArtifacts = this.instantiateComputedArtifacts();
-        const artifacts = Object.assign(computedArtifacts, tracingData);
+        const artifacts = Object.assign({}, computedArtifacts, tracingData);
 
         passes.forEach(pass => {
           pass.gatherers.forEach(gatherer => {

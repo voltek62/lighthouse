@@ -176,10 +176,7 @@ describe('Config', () => {
     });
     const traceUserTimings = require('../fixtures/traces/trace-user-timings.json');
     assert.deepStrictEqual(config.artifacts.traces.defaultPass.traceEvents, traceUserTimings);
-    assert.ok(config.artifacts.CriticalRequestChains);
-    assert.ok(config.artifacts.CriticalRequestChains['93149.1']);
-    assert.ok(config.artifacts.CriticalRequestChains['93149.1'].request);
-    assert.ok(config.artifacts.CriticalRequestChains['93149.1'].children);
+    assert.equal(config.artifacts.networkRecords.length, 76);
   });
 
   it('handles traces with no TracingStartedInPage events', () => {

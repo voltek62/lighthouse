@@ -353,8 +353,9 @@ describe('GatherRunner', function() {
       loadPage: true,
       gatherers: [new TestGatherer()]
     }];
+    const options = {driver: fakeDriver, url: 'https://example.com', flags: {}, config: {}};
 
-    return GatherRunner.run(passes, {driver: fakeDriver, url: 'https://example.com', flags: {}})
+    return GatherRunner.run(passes, options)
         .then(artifacts => {
           const p = artifacts.requestCriticalRequestChains(artifacts.networkRecords);
           return p.then(chains => {
