@@ -22,10 +22,38 @@ const assetSaver = require('./lib/asset-saver');
 const log = require('./lib/log');
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 
 class Runner {
   static run(driver, opts) {
+    // Clean opts input.
+    opts.flags = opts.flags || {};
+
+    // Default mobile emulation and page loading to true.
+    // The extension will switch these off initially.
+    if (typeof opts.flags.mobile === 'undefined') {
+      opts.flags.mobile = true;
+    }
+
+    if (typeof opts.flags.loadPage === 'undefined') {
+      opts.flags.loadPage = true;
+    }
+
     const config = opts.config;
+
+    // save the initialUrl provided by the user
+    opts.initialUrl = opts.url;
+    if (typeof opts.initialUrl !== 'string' || opts.initialUrl.length === 0) {
+      return Promise.reject(new Error('You must provide a url to the driver'));
+    }
+    const parsedURL = url.parse(opts.url);
+    // canonicalize URL with any trailing slashes neccessary
+    opts.url = url.format(parsedURL);
+    // If the URL isn't https and is also not localhost complain to the user.
+    if (!parsedURL.protocol.includes('https') && parsedURL.hostname !== 'localhost') {
+      log.warn('Lighthouse', 'The URL provided should be on HTTPS');
+      log.warn('Lighthouse', 'Performance stats will be skewed redirecting from HTTP to HTTPS.');
+    }
 
     // Check that there are passes & audits...
     const validPassesAndAudits = config.passes && config.audits;
@@ -40,8 +68,9 @@ class Runner {
     // to check that there are artifacts specified in the config, and throw if not.
     if (validPassesAndAudits || validArtifactsAndAudits) {
       if (validPassesAndAudits) {
+        opts.driver = driver;
         // Finally set up the driver to gather.
-        run = run.then(_ => GatherRunner.run(config.passes, Object.assign({}, opts, {driver})));
+        run = run.then(_ => GatherRunner.run(config.passes, opts));
       } else if (validArtifactsAndAudits) {
         run = run.then(_ => {
           return Object.assign(GatherRunner.instantiateComputedArtifacts(), config.artifacts);
@@ -93,7 +122,9 @@ class Runner {
               formatted[audit.name] = audit;
               return formatted;
             }, {});
+
             return {
+              initialUrl: opts.initialUrl,
               url: opts.url,
               audits: formattedAudits,
               aggregations
@@ -111,6 +142,16 @@ class Runner {
   static getAuditList() {
     return fs
         .readdirSync(path.join(__dirname, './audits'))
+        .filter(f => /\.js$/.test(f));
+  }
+
+  /**
+   * Returns list of gatherer names for external querying.
+   * @return {!Array<string>}
+   */
+  static getGathererList() {
+    return fs
+        .readdirSync(path.join(__dirname, './gather/gatherers'))
         .filter(f => /\.js$/.test(f));
   }
 }
