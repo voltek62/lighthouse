@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-/* global caches, fetch, self */
+/* eslint-env worker, serviceworker */
 
 // This service-worker courtesy of googlechrome.github.io/samples/service-worker/basic/index.html
 
