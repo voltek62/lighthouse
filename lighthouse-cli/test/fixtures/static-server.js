@@ -6,16 +6,14 @@ const parseURL = require('url').parse;
 
 function requestHandler(request, response) {
   const filePath = parseURL(request.url).pathname;
+  const queryString = parseURL(request.url).search;
   const absoluteFilePath = path.join(__dirname, filePath);
 
   fs.exists(absoluteFilePath, fsExistsCallback);
 
   function fsExistsCallback(fileExists) {
     if (!fileExists) {
-      if (!filePath.endsWith('favicon.ico')) {
-        console.error(`Cannot find file ${absoluteFilePath}`);
-      }
-      return sendResponse(404, '404 - File not found');
+      return sendResponse(404, `404 - File not found. ${absoluteFilePath}`);
     }
     fs.readFile(absoluteFilePath, 'binary', readFileCallback);
   }
@@ -30,8 +28,17 @@ function requestHandler(request, response) {
 
   function sendResponse(statusCode, data) {
     const headers = filePath.endsWith('.js') ?
-        {'Content-Type': 'text/javascript'} : undefined;
+      {'Content-Type': 'text/javascript'} : undefined;
     response.writeHead(statusCode, headers);
+
+    if (queryString && queryString.includes('delay')) {
+      response.write('');
+      return setTimeout(finishResponse, 2000, data);
+    }
+    finishResponse(data);
+  }
+
+  function finishResponse(data) {
     response.write(data, 'binary');
     response.end();
   }
